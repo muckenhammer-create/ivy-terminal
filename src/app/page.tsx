@@ -1,101 +1,146 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useMemo, useCallback } from "react";
+import Topbar from "@/components/Topbar";
+import Sidebar from "@/components/Sidebar";
+import OpportunityCard from "@/components/OpportunityCard";
+import DetailModal from "@/components/DetailModal";
+import { SEED_OPPORTUNITIES } from "@/lib/seed";
+import { computeMatchScore } from "@/lib/scoring";
+import { Opportunity, BrandBrief, Weights, OpportunityType, TrendDir } from "@/lib/types";
+
+const DEFAULT_BRIEF: BrandBrief = {
+  categories: [],
+  objectives: [],
+  budgetMin: 0,
+  budgetMax: 0,
+  geos: [],
+};
+
+const DEFAULT_WEIGHTS: Weights = {
+  audience: 5,
+  budget: 5,
+  category: 5,
+  exclusivity: 3,
+  trend: 4,
+};
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [search, setSearch] = useState("");
+  const [brief, setBrief] = useState<BrandBrief>(DEFAULT_BRIEF);
+  const [weights, setWeights] = useState<Weights>(DEFAULT_WEIGHTS);
+  const [typeFilters, setTypeFilters] = useState<OpportunityType[]>([]);
+  const [sportFilters, setSportFilters] = useState<string[]>([]);
+  const [trendFilter, setTrendFilter] = useState<TrendDir | null>(null);
+  const [selectedOpp, setSelectedOpp] = useState<Opportunity | null>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+  const scored = useMemo(() => {
+    let opps = SEED_OPPORTUNITIES;
+
+    if (search) {
+      const q = search.toLowerCase();
+      opps = opps.filter(
+        (o) =>
+          o.name.toLowerCase().includes(q) ||
+          o.sport.toLowerCase().includes(q) ||
+          o.meta.toLowerCase().includes(q) ||
+          o.tags.some((t) => t.toLowerCase().includes(q))
+      );
+    }
+
+    if (typeFilters.length > 0) {
+      opps = opps.filter((o) => typeFilters.includes(o.type));
+    }
+
+    if (sportFilters.length > 0) {
+      opps = opps.filter((o) => sportFilters.includes(o.sport));
+    }
+
+    if (trendFilter) {
+      opps = opps.filter((o) => o.trend_dir === trendFilter);
+    }
+
+    if (brief.geos.length > 0) {
+      opps = opps.filter((o) => o.geo.some((g) => brief.geos.includes(g)));
+    }
+
+    return opps
+      .map((opp) => ({ opp, score: computeMatchScore(opp, brief, weights) }))
+      .sort((a, b) => b.score - a.score);
+  }, [search, brief, weights, typeFilters, sportFilters, trendFilter]);
+
+  const handleExport = useCallback(() => {
+    const headers = ["Name", "Type", "Sport", "Match Score", "Budget Min", "Budget Max", "Reach", "Geography", "Exclusive"];
+    const rows = scored.map(({ opp, score }) => [
+      opp.name, opp.type, opp.sport, score, opp.budget_min, opp.budget_max, opp.reach, opp.geo.join(";"), opp.excl ? "Yes" : "No",
+    ]);
+    const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "ivy-opportunities.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [scored]);
+
+  const selectedScore = selectedOpp
+    ? scored.find((s) => s.opp.id === selectedOpp.id)?.score ?? 0
+    : 0;
+
+  return (
+    <div className="h-screen flex flex-col overflow-hidden">
+      <Topbar search={search} onSearchChange={setSearch} onExport={handleExport} />
+
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar
+          brief={brief}
+          onBriefChange={setBrief}
+          weights={weights}
+          onWeightsChange={setWeights}
+          typeFilters={typeFilters}
+          onTypeFiltersChange={setTypeFilters}
+          sportFilters={sportFilters}
+          onSportFiltersChange={setSportFilters}
+          trendFilter={trendFilter}
+          onTrendFilterChange={setTrendFilter}
+        />
+
+        <main className="flex-1 overflow-y-auto p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-serif text-lg font-semibold text-ink">
+              {scored.length} Opportunities
+            </h2>
+            <p className="text-xs text-mist">Ranked by match score</p>
+          </div>
+
+          <div className="grid gap-3">
+            {scored.map(({ opp, score }) => (
+              <OpportunityCard
+                key={opp.id}
+                opportunity={opp}
+                matchScore={score}
+                onClick={() => setSelectedOpp(opp)}
+              />
+            ))}
+          </div>
+
+          {scored.length === 0 && (
+            <div className="flex flex-col items-center justify-center h-64 text-mist">
+              <p className="text-lg font-serif">No opportunities match your filters</p>
+              <p className="text-sm mt-1">Try adjusting your brief or filters</p>
+            </div>
+          )}
+        </main>
+      </div>
+
+      {selectedOpp && (
+        <DetailModal
+          opportunity={selectedOpp}
+          matchScore={selectedScore}
+          onClose={() => setSelectedOpp(null)}
+        />
+      )}
     </div>
   );
 }
