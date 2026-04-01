@@ -10,23 +10,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // Try Supabase first, fall back to in-memory acknowledgement
-    try {
-      const { data, error } = await supabase
-        .from("enquiries")
-        .insert({ opportunity_id, brand_category, email, message, status: "new" })
-        .select()
-        .single();
+    if (supabase) {
+      try {
+        const { data, error } = await supabase
+          .from("enquiries")
+          .insert({ opportunity_id, brand_category, email, message, status: "new" })
+          .select()
+          .single();
 
-      if (error) throw error;
-      return NextResponse.json(data, { status: 201 });
-    } catch {
-      // Supabase not configured — acknowledge anyway
-      return NextResponse.json(
-        { id: crypto.randomUUID(), opportunity_id, brand_category, email, message, status: "new", created_at: new Date().toISOString() },
-        { status: 201 }
-      );
+        if (error) throw error;
+        return NextResponse.json(data, { status: 201 });
+      } catch {
+        // Supabase error — fall through to fallback
+      }
     }
+
+    return NextResponse.json(
+      { id: crypto.randomUUID(), opportunity_id, brand_category, email, message, status: "new", created_at: new Date().toISOString() },
+      { status: 201 }
+    );
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
