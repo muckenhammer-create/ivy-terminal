@@ -13,12 +13,21 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    const from = new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+
     const res = await fetch(
-      `https://newsapi.org/v2/everything?q=${encodeURIComponent(q)}&sortBy=publishedAt&pageSize=5&apiKey=${apiKey}`,
+      `https://newsapi.org/v2/everything?q=${encodeURIComponent(q)}&language=en&from=${from}&sortBy=relevancy&pageSize=5&apiKey=${apiKey}`,
       { next: { revalidate: 3600 } }
     );
     const data = await res.json();
-    return NextResponse.json({ articles: data.articles ?? [] });
+
+    const queryWords = q.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
+    const filtered = (data.articles ?? []).filter((a: { title?: string; description?: string }) => {
+      const text = `${a.title ?? ""} ${a.description ?? ""}`.toLowerCase();
+      return queryWords.some((w) => text.includes(w));
+    });
+
+    return NextResponse.json({ articles: filtered });
   } catch {
     return NextResponse.json({ articles: [] });
   }
