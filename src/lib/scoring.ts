@@ -1,8 +1,8 @@
 import { Opportunity, BrandBrief, Weights } from "./types";
 
 function audienceScore(opp: Opportunity): number {
-  const { income_score, real_follower_pct, age_18_34_pct, female_pct } = opp.audience;
-  return (income_score * 0.3 + real_follower_pct * 0.3 + age_18_34_pct * 0.2 + female_pct * 0.2);
+  const { income, real, y1834, female } = opp.audience;
+  return (income * 0.3 + real * 0.3 + y1834 * 0.2 + female * 0.2);
 }
 
 function budgetScore(opp: Opportunity, brief: BrandBrief): number {

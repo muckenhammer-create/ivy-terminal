@@ -2,10 +2,10 @@
 
 import { BrandBrief, Weights, OpportunityType, TrendDir } from "@/lib/types";
 
-const CATEGORIES = ["Sportswear", "FMCG", "Luxury", "Automotive", "Fintech", "Tech", "Beverages", "Entertainment", "Beauty", "Health", "Education"];
+const CATEGORIES = ["Luxury", "Sportswear", "Finance", "Auto", "Tech", "Energy", "FMCG", "Hospitality", "Entertainment", "Beauty", "Health", "Education"];
 const OBJECTIVES = ["Brand Awareness", "Lead Generation", "Community", "Content", "Hospitality", "ESG/CSR"];
-const GEOS = ["UK", "USA", "Global", "Europe", "China", "India", "LATAM", "APAC", "Africa"];
-const SPORTS = ["Football", "Tennis", "Basketball", "Golf", "Athletics", "Motorsport", "Multi-sport", "Cricket", "Rugby", "Running", "Cycling"];
+const GEOS = ["Global", "Europe", "Americas", "Asia", "UK", "USA", "MENA", "Africa", "LATAM"];
+const SPORTS = ["Football", "Tennis", "Golf", "Motorsport", "Basketball", "Cycling", "Athletics", "Cricket", "Rugby", "Badminton", "Swimming"];
 const TYPES: OpportunityType[] = ["athlete", "club", "event", "league", "grassroots"];
 
 interface SidebarProps {

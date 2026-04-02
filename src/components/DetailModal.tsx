@@ -218,10 +218,10 @@ export default function DetailModal({ opportunity: opp, matchScore, onClose }: M
                 <h3 className="font-serif text-sm font-semibold text-ink mb-3">Audience</h3>
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { label: "Income Score", value: opp.audience.income_score },
-                    { label: "Real Followers", value: `${opp.audience.real_follower_pct}%` },
-                    { label: "Age 18-34", value: `${opp.audience.age_18_34_pct}%` },
-                    { label: "Female", value: `${opp.audience.female_pct}%` },
+                    { label: "Income Score", value: opp.audience.income },
+                    { label: "Real Followers", value: `${opp.audience.real}%` },
+                    { label: "Age 18-34", value: `${opp.audience.y1834}%` },
+                    { label: "Female", value: `${opp.audience.female}%` },
                   ].map((s) => (
                     <div key={s.label}>
                       <p className="text-[11px] text-mist">{s.label}</p>

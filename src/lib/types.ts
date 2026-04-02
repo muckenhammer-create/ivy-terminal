@@ -13,10 +13,10 @@ export interface Opportunity {
   excl: boolean;
   cat_fit: Record<string, number>;
   audience: {
-    income_score: number;
-    real_follower_pct: number;
-    age_18_34_pct: number;
-    female_pct: number;
+    income: number;
+    real: number;
+    y1834: number;
+    female: number;
   };
   budget_min: number;
   budget_max: number;
