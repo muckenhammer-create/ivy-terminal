@@ -48,7 +48,7 @@ export default function DetailModal({ opportunity: opp, matchScore, onClose }: M
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          prompt: `You are IVY Intelligence, a sports sponsorship analyst. Provide a concise analysis (3-4 paragraphs) of "${opp.name}" as a sponsorship opportunity. Cover: brand fit potential, audience quality, key risks, and strategic recommendation. Be specific and data-informed. The opportunity type is ${opp.type} in ${opp.sport}. Their reach is ${opp.reach} with budget range ${formatBudget(opp.budget_min)} to ${formatBudget(opp.budget_max)}.`,
+          prompt: `You are IVY Intelligence, a sports sponsorship analyst. Give a brief, punchy analysis of "${opp.name}" as a sponsorship opportunity in 3-4 short bullet points. Each bullet should be one sentence max. Cover: brand fit, audience quality, top risk, and one strategic recommendation. No filler, no intros, no conclusions. Type: ${opp.type}, Sport: ${opp.sport}, Reach: ${opp.reach}, Budget: ${formatBudget(opp.budget_min)}–${formatBudget(opp.budget_max)}.`,
         }),
       });
       const data = await res.json();
