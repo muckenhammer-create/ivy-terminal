@@ -2,6 +2,7 @@
 
 import { Opportunity } from "@/lib/types";
 import { useState, useEffect } from "react";
+import LiveDataSection from "./LiveDataSection";
 
 interface ModalProps {
   opportunity: Opportunity;
@@ -240,6 +241,13 @@ export default function DetailModal({ opportunity: opp, matchScore, onClose }: M
                   ))}
                 </div>
               </section>
+
+              {/* Live Data */}
+              <LiveDataSection
+                opportunityName={opp.name}
+                opportunityType={opp.type}
+                opportunitySport={opp.sport}
+              />
 
               {/* AI Analysis */}
               <section className="p-4 bg-white rounded-xl border border-border">
